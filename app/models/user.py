@@ -21,3 +21,6 @@ class User(Base):
 
     # Password encriptado
     password = Column(String, nullable=False)
+
+    # Rol del usuario: "user" o "admin"
+    role = Column(String, default="user")
