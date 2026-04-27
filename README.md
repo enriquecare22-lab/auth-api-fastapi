@@ -1,17 +1,20 @@
 # Auth API - FastAPI
 
-API de autenticación profesional construida con **FastAPI**, usando **PostgreSQL**, **JWT** y arquitectura por capas.
-
+API de autenticación profesional construida con **FastAPI**, usando **PostgreSQL**, **JWT**, arquitectura por capas y control de acceso por roles(RBAC)
 ---
 
 ## 📌 Características
 
 * Registro de usuarios
-* Login con autenticación JWT
+* Login con autenticación JWT(Bearer Token)
 * Hash seguro de contraseñas (bcrypt)
-* Arquitectura limpia (models, schemas, services, repositories)
-* Configuración por variables de entorno (.env)
-* Estructura escalable 
+* Rutas protegidas con autenticación
+* Contorl de acceso por roles (admin/user)
+* Obtencion del usuario actual desde token
+* Arquitectura por capas (clean architecture)
+* Configuración por variables de entorno (.env)F
+
+
 
 ---
 
@@ -36,10 +39,12 @@ app/
 │   └── v1/
 │       └── routes/
 │           └── auth.py
+|           └── user.py
 │
 ├── core/
 │   ├── config.py
 │   └── security.py
+|   └── dependencies.py
 │
 ├── db/
 │   └── session.py
@@ -121,31 +126,50 @@ Abrir en navegador:
 👉 http://127.0.0.1:8000/docs
 
 ---
+Autenticación
 
-## Endpoints
+La API usa JWT (Bearer Token).
 
-### 📌 Registro
+Flujo:
+Login → obtiene token
+Enviar token en headers
+Acceder a rutas protegidas
 
-```
+Header:
+
+Authorization: Bearer <your_token>
+
+
+Endpoints
+🔑 Auth
+Registro
 POST /auth/register
-```
-
-### 📌 Login
-
-```
+Login
 POST /auth/login
-```
 
-Respuesta:
 
-```
-{
-  "access_token": "JWT_TOKEN",
-  "token_type": "bearer"
-}
-```
+Usuarios
+Obtener usuario actual
+GET /users/me
+
+👉 Requiere token
 
 ---
+
+Admin
+Endpoint solo admin
+GET /users/admin
+
+👉 Requiere rol "admin"
+
+### Seguridad
+
+Passwords encriptadas con bcrypt
+Tokens JWT firmados
+Middleware de autenticación
+Control de acceso por roles (RBAC)
+Variables sensibles en .env
+
 
 ## 🧪 Testing manual
 
@@ -171,24 +195,11 @@ feature/env-config
 refactor/add-comments
 ```
 
----
-
-## Seguridad
-
-* Contraseñas encriptadas con bcrypt
-* Uso de variables de entorno (.env)
-* Tokens JWT
-
----
-
-## 🚀 Próximas mejoras
-
-* Refresh tokens
-* Protección de rutas
-* Roles (admin/user)
-* Docker
-* Deploy (Render / Railway)
-* Migraciones con Alembic
-
----
+### Próximas mejoras
+Expiración de tokens
+Refresh tokens
+Permisos granulares
+Docker
+Deploy (Render / Railway)
+Migraciones con Alembic---
 
