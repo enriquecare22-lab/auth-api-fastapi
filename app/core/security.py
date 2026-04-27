@@ -1,7 +1,7 @@
-from passlib.context import CryptContext
 from jose import jwt
-from app.core.config import settings
+from passlib.context import CryptContext
 
+from app.core.config import settings
 
 # Configuracion del algoritmo de hashing (bcrypt)
 pwd_context = CryptContext(schemes=["bcrypt"])
