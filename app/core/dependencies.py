@@ -21,6 +21,19 @@ def get_db():
         db.close()
 
 
+def require_role(role: str):
+    """
+    Middleware para validar role
+    """
+
+    def role_checker(user=Depends(get_current_user)):
+        if user.role != role:
+            raise HTTPException(status_code=403, detail="Ferbidden")
+        return user
+
+    return role_checker
+
+
 def get_current_user(
     token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
 ):
