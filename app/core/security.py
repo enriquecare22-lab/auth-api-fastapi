@@ -1,4 +1,4 @@
-from jose import jwt
+from jose import JWTError, jwt
 from passlib.context import CryptContext
 
 from app.core.config import settings
@@ -27,3 +27,18 @@ def create_token(data: dict):
     Genera un token JWT con la información del usuario
     """
     return jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+def decode_token(token: str):
+    """
+    Decodifica un JWT y retorna el payload
+    - Si el token es valido: devuelve datos (ej: email)
+    - Si es invalido: retorna NONE
+    """
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        return payload
+    except JWTError:
+        return None
