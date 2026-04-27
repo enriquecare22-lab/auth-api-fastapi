@@ -11,7 +11,7 @@ class User(Base):
     Representa la tabla 'users'
     """
 
-    __table__ = "users"
+    __tablename__ = "users"
 
     # ID unico del usuario
     id = Column(Integer, primary_key=True, index=True)
