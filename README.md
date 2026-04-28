@@ -1,24 +1,23 @@
-# Auth API - FastAPI
+# 🚀 Auth API - FastAPI
 
-API de autenticación profesional construida con **FastAPI**, usando **PostgreSQL**, **JWT**, arquitectura por capas y control de acceso por roles(RBAC)
+API de autenticación profesional construida con **FastAPI**, usando **PostgreSQL**, **JWT**, arquitectura por capas y control de acceso por roles (**RBAC**).
+
 ---
 
 ## 📌 Características
 
 * Registro de usuarios
-* Login con autenticación JWT(Bearer Token)
-* Hash seguro de contraseñas (bcrypt)
+* Login con autenticación JWT (**Bearer Token**)
+* Hash seguro de contraseñas (**bcrypt**)
 * Rutas protegidas con autenticación
-* Contorl de acceso por roles (admin/user)
-* Obtencion del usuario actual desde token
-* Arquitectura por capas (clean architecture)
-* Configuración por variables de entorno (.env)F
-
-
+* Control de acceso por roles (**admin / user**)
+* Obtención del usuario actual desde el token
+* Arquitectura por capas (Clean Architecture)
+* Configuración mediante variables de entorno (`.env`)
 
 ---
 
-## Tecnologías
+## 🛠️ Tecnologías
 
 * Python 3.10+
 * FastAPI
@@ -38,13 +37,13 @@ app/
 ├── api/
 │   └── v1/
 │       └── routes/
-│           └── auth.py
-|           └── user.py
+│           ├── auth.py
+│           └── user.py
 │
 ├── core/
 │   ├── config.py
-│   └── security.py
-|   └── dependencies.py
+│   ├── security.py
+│   └── dependencies.py
 │
 ├── db/
 │   └── session.py
@@ -66,11 +65,11 @@ app/
 
 ---
 
-## Configuración del entorno
+## ⚙️ Configuración del entorno
 
 ### 1. Clonar repositorio
 
-```
+```bash
 git clone https://github.com/TU_USER/auth-api-fastapi.git
 cd auth-api-fastapi
 ```
@@ -79,13 +78,13 @@ cd auth-api-fastapi
 
 ### 2. Crear entorno virtual
 
-```
+```bash
 python -m venv venv
 ```
 
 Activar:
 
-```
+```bash
 # Windows
 venv\Scripts\activate
 
@@ -97,7 +96,7 @@ source venv/bin/activate
 
 ### 3. Instalar dependencias
 
-```
+```bash
 pip install -r requirements.txt
 ```
 
@@ -107,7 +106,7 @@ pip install -r requirements.txt
 
 Crear archivo `.env`:
 
-```
+```env
 DATABASE_URL=postgresql://user:password@localhost/db_name
 SECRET_KEY=supersecret
 ALGORITHM=HS256
@@ -117,7 +116,7 @@ ALGORITHM=HS256
 
 ## ▶️ Ejecutar servidor
 
-```
+```bash
 uvicorn app.main:app --reload
 ```
 
@@ -126,80 +125,120 @@ Abrir en navegador:
 👉 http://127.0.0.1:8000/docs
 
 ---
-Autenticación
 
-La API usa JWT (Bearer Token).
+## 🔐 Autenticación
 
-Flujo:
-Login → obtiene token
-Enviar token en headers
-Acceder a rutas protegidas
+La API utiliza **JWT con esquema Bearer Token**.
 
-Header:
+### Flujo:
 
+1. Login → obtiene token
+2. Enviar token en headers
+3. Acceder a rutas protegidas
+
+### Header requerido
+
+```http
 Authorization: Bearer <your_token>
-
-
-Endpoints
-🔑 Auth
-Registro
-POST /auth/register
-Login
-POST /auth/login
-
-
-Usuarios
-Obtener usuario actual
-GET /users/me
-
-👉 Requiere token
+```
 
 ---
 
-Admin
-Endpoint solo admin
+## 🌐 Endpoints
+
+### 🔑 Auth
+
+**Registro**
+
+```http
+POST /auth/register
+```
+
+**Login**
+
+```http
+POST /auth/login
+```
+
+Body:
+
+```json
+{
+  "email": "user@email.com",
+  "password": "123456"
+}
+```
+
+---
+
+### 👤 Usuarios
+
+**Obtener usuario actual**
+
+```http
+GET /users/me
+```
+
+👉 Requiere autenticación
+
+---
+
+### 👑 Admin
+
+**Endpoint solo admin**
+
+```http
 GET /users/admin
+```
 
-👉 Requiere rol "admin"
+👉 Requiere rol `"admin"`
 
-### Seguridad
+---
 
-Passwords encriptadas con bcrypt
-Tokens JWT firmados
-Middleware de autenticación
-Control de acceso por roles (RBAC)
-Variables sensibles en .env
+## 🛡️ Seguridad
 
+* Contraseñas encriptadas con bcrypt
+* Tokens JWT firmados
+* Middleware de autenticación
+* Control de acceso por roles (RBAC)
+* Variables sensibles protegidas en `.env`
 
-## 🧪 Testing manual
+---
 
-Puedes usar:
+## 🧪 Testing
+
+Puedes probar la API con:
 
 * Swagger UI (`/docs`)
 * Postman
 
-
 ---
 
-## Flujo de trabajo (Git)
+## 🌿 Flujo de trabajo (Git)
 
 * `main` → producción
 * `feature/*` → nuevas funcionalidades
-* `refactor/*` → mejoras de código
+* `refactor/*` → mejoras
 
 Ejemplo:
 
-```
+```bash
 feature/auth
 feature/env-config
-refactor/add-comments
+feature/roles-rbac
+refactor/code-cleanup
 ```
 
-### Próximas mejoras
-Expiración de tokens
-Refresh tokens
-Permisos granulares
-Docker
-Deploy (Render / Railway)
-Migraciones con Alembic---
+---
+
+## 🚀 Próximas mejoras
+
+* Expiración de tokens
+* Refresh tokens
+* Permisos granulares
+* Docker
+* Deploy (Render / Railway)
+* Migraciones con Alembic
+
+---
 
