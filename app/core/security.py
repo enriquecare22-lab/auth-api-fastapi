@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
@@ -26,6 +28,14 @@ def create_token(data: dict):
     """
     Genera un token JWT con la información del usuario
     """
+    to_encode = data.copy()
+
+    # Tiempo actual
+    now = datetime.utcnow()
+    expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    to_encode.update({"exp": expire, "iat": now})
+
     return jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
@@ -39,6 +49,7 @@ def decode_token(token: str):
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
+        print(payload)
         return payload
     except JWTError:
         return None
