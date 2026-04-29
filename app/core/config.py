@@ -1,18 +1,23 @@
-import os
-
-from dotenv import load_dotenv
-
-load_dotenv()
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings:
-    DATABASE_URL: str = os.getenv("DATABASE_URL")
-    SECRET_KEY: str = os.getenv("SECRET_KEY")
-    ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
+class Settings(BaseSettings):
+    # Base de datos
+    DATABASE_URL: str
 
-    # Expiracion
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESs_TOKEN_EXPIRE_MINUTES", 30))
-    REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", 7))
+    # Seguridad
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+
+    # Expiracion de tokens
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    # Configuracion interna de Pydantic
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", case_sensitive=True  # archivo .env
+    )
 
 
+# Instancia globlal
 settings = Settings()
