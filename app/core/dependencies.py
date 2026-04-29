@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import decode_token
 from app.db.session import SessionLocal
+from app.models.token_blacklist import TokenBlacklist
 from app.repositories.user_repository import get_user_by_email
 
 security = HTTPBearer()
@@ -46,6 +47,12 @@ def get_current_user(
 
     # Extrae el token sin el "Bearer"
     token = credentials.credentials
+
+    # Verificar blacklist
+    blacklisted = db.query(TokenBlacklist).filter(TokenBlacklist.token == token).first()
+
+    if blacklisted:
+        raise HTTPException(status_code=401, detail="Token revoked")
 
     payload = decode_token(token)
 
