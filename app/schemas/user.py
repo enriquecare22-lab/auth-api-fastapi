@@ -1,31 +1,25 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
-class UserCreate(BaseModel):
-    """
-    Schema para registrar usuario
-    """
+# Clase base: contiene los atributos comunes para evitar repetir código
+class UserBase(BaseModel):
+    email: EmailStr  # Valida automaticamente que el formato sea un correo real
 
-    email: str
+
+class UserCreate(UserBase):
+    # Obliga a que la contraseña tenga una longitud segura antes de procesarla
+    password: str = Field(min_length=6, max_length=100)
+
+
+# Esquema para el inicio de sesión
+class UserLogin(UserBase):
     password: str
 
 
-class UserLogin(BaseModel):
-    """
-    Schema para login
-    """
+# Esquema para enviar datos al cliente (lo que el usuairo ve)
+class UserResponse(UserBase):
+    id: int  # Incluimos el id generado por la base da datos
 
-    email: EmailStr
-    password: str
-
-
-class UserResponse(BaseModel):
-    """
-    Schema de respuesta (no expone password)
-    """
-
-    id: int
-    email: EmailStr
-
+    # Configuracion para la compatibilidad con ORMs (SQLAlchemy)
     class Config:
         from_attributes = True
