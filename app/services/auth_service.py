@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from sqlalchemy.orm import Session
 
 from app.core.security import (
     create_refresh_token,
@@ -9,35 +10,41 @@ from app.core.security import (
 from app.repositories.user_repository import create_user, get_user_by_email
 
 
-def register(db, user):
+def register(db: Session, user):
     """
-    Registro de usuario
+    Logica para registrar un nuevo usuario en el sistema
     """
 
-    # Validadr si ya existe
+    # Validadr si el correo ya esta registrado
     if get_user_by_email(db, user.email):
-        raise HTTPException(status_code=400, detail="User already exists")
+        raise HTTPException(status_code=409, detail="User already exists")
 
-    # Encriptar password
+    # Encriptar password - no guardar en texto plano
     hashed = hash_password(user.password)
 
-    # Crear usuario
+    # Persistencia: Guardar usuario con la contraseña hasheada
     return create_user(db, user.email, hashed)
 
 
-def login(db, user):
+def login(db: Session, user):
     """
-    Login de usuario
+    Login de usuario: autenticar usuario y generar sus token de acceso
     """
+    # Buscamos el usuario por email
     db_user = get_user_by_email(db, user.email)
 
     # Validar credenciales
     if not db_user or not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    data = {"sub": user.email}
+    # Preparacion del Payload: Informacion que viajara dentro del JWT
+    data = {"sub": db_user.email, "role": db_user.role}
 
-    acces_token = create_token(data)
-    refresh_token = create_refresh_token(data)
-
-    return {"acces_token": acces_token, "refresh_token": refresh_token}
+    # Generacion del Tokens:
+    # - access_token: Para peticiones normales
+    # - refresh_token: Para renovar el acceso sin pedir contrasña
+    return {
+        "acces_token": create_token(data),
+        "refresh_token": create_refresh_token(data),
+        "token_type": "bearer",
+    }
