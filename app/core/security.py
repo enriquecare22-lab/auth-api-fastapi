@@ -26,7 +26,7 @@ def verify_password(password, hashed):
 
 def create_token(data: dict):
     """
-    Genera un token JWT con la información del usuario
+    Genera un token JWT con expircaion
     """
     to_encode = data.copy()
 
@@ -34,9 +34,21 @@ def create_token(data: dict):
     now = datetime.utcnow()
     expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    to_encode.update({"exp": expire, "iat": now})
+    to_encode.update({"exp": expire, "iat": now, "type": "access"})
 
     return jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+def create_refresh_token(data: dict):
+    """
+    Gener refresh token
+    """
+    to_encode = data.copy()
+
+    expire = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode.update({"exp": expire, "type": "access"})
+
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 def decode_token(token: str):
