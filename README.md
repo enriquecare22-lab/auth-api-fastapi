@@ -50,6 +50,7 @@ app/
 │
 ├── models/
 │   └── user.py
+│   └── token_blacklist.py
 │
 ├── schemas/
 │   └── user.py
@@ -110,6 +111,8 @@ Crear archivo `.env`:
 DATABASE_URL=postgresql://user:password@localhost/db_name
 SECRET_KEY=supersecret
 ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+ACCESS_TOKen_EXPIRE_DAYS=7
 ```
 
 ---
@@ -125,6 +128,13 @@ Abrir en navegador:
 👉 http://127.0.0.1:8000/docs
 
 ---
+## Logout (Blacklist)
+
+La API implementa una blacklist básica de tokens:
+
+Al hacer logout → el token se guarda en DB
+Tokens en blacklist → no pueden acceder
+
 
 ## 🔐 Autenticación
 
@@ -199,8 +209,10 @@ GET /users/admin
 
 * Contraseñas encriptadas con bcrypt
 * Tokens JWT firmados
+* Expiración configurable
 * Middleware de autenticación
 * Control de acceso por roles (RBAC)
+* Blacklist de tokens
 * Variables sensibles protegidas en `.env`
 
 ---
