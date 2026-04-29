@@ -1,6 +1,12 @@
 from fastapi import HTTPException
-from app.repositories.user_repository import get_user_by_email, create_user
-from app.core.security import hash_password, verify_password, create_token
+
+from app.core.security import (
+    create_refresh_token,
+    create_token,
+    hash_password,
+    verify_password,
+)
+from app.repositories.user_repository import create_user, get_user_by_email
 
 
 def register(db, user):
@@ -29,7 +35,9 @@ def login(db, user):
     if not db_user or not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    # Crear token JWT
-    token = create_token({"sub": user.email})
+    data = {"sub": user.email}
 
-    return {"acces_token": token, "token_type": "bearer"}
+    acces_token = create_token(data)
+    refresh_token = create_refresh_token(data)
+
+    return {"acces_token": acces_token, "refresh_token": refresh_token}
