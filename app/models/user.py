@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import declarative_base
 
-# Base para todos los modelos
-Base = declarative_base()
+from app.db.session import Base
 
 
 class User(Base):
