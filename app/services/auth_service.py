@@ -8,6 +8,7 @@ from app.core.security import (
     verify_password,
 )
 from app.repositories.user_repository import create_user, get_user_by_email
+from app.schemas.user import Token, UserLogin
 
 
 def register(db: Session, user):
@@ -26,16 +27,19 @@ def register(db: Session, user):
     return create_user(db, user.email, hashed)
 
 
-def login(db: Session, user):
+def login(db: Session, user: UserLogin) -> Token:
     """
     Login de usuario: autenticar usuario y generar sus token de acceso
     """
     # Buscamos el usuario por email
     db_user = get_user_by_email(db, user.email)
 
-    # Validar credenciales
+    # FIX: validar credenciales, correcta
     if not db_user or not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    if not db_user.is_active:
+        raise HTTPException(status_code=401, detail="Inactive user")
 
     # Preparacion del Payload: Informacion que viajara dentro del JWT
     data = {"sub": db_user.email, "role": db_user.role}
@@ -43,8 +47,8 @@ def login(db: Session, user):
     # Generacion del Tokens:
     # - access_token: Para peticiones normales
     # - refresh_token: Para renovar el acceso sin pedir contrasña
-    return {
-        "acces_token": create_token(data),
-        "refresh_token": create_refresh_token(data),
-        "token_type": "bearer",
-    }
+    return Token(
+        access_token=create_token(data),  # FIX nombre correcto
+        refresh_token=create_refresh_token(data),
+        token_type="bearer",
+    )
