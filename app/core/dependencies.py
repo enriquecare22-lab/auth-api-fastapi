@@ -49,8 +49,8 @@ def get_current_user(
     if db.query(TokenBlacklist).filter(TokenBlacklist.token == token).first():
         raise HTTPException(status_code=401, detail="Token revoked")
 
-    # Decodificacion: valida la firma del JWT y su expiracion
-    payload = decode_token(token)
+    # FIX: validar tipo acces
+    payload = decode_token(token, expected_type="access")
 
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid token")
