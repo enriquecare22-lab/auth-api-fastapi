@@ -23,3 +23,13 @@ class UserResponse(UserBase):
     # Configuracion para la compatibilidad con ORMs (SQLAlchemy)
     class Config:
         from_attributes = True
+
+
+class Token(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class TokenRefresh(BaseModel):
+    refresh_roken: str
