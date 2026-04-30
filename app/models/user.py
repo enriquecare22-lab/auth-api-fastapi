@@ -25,4 +25,6 @@ class User(Base):
     # Rol del usuario: "user" o "admin"
     role = Column(String(50), default="user", nullable=False)
 
-    is_active = Column(DateTime, default=datetime.utcnow)
+    is_active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
