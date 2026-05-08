@@ -32,4 +32,4 @@ class Token(BaseModel):
 
 
 class TokenRefresh(BaseModel):
-    refresh_roken: str
+    refresh_token: str

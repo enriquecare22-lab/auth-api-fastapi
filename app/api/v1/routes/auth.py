@@ -37,7 +37,7 @@ def refresch_token(data: TokenRefresh):
     - usa schema
     - valida tipo refresh
     """
-    payload = decode_token(data.refresh_roken, expected_type="refresh")
+    payload = decode_token(data.refresh_token, expected_type="refresh")
 
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
@@ -49,4 +49,4 @@ def refresch_token(data: TokenRefresh):
         "type": "access"
         })
     
-    return {"acces_token": new_access_token}
+    return {"access_token": new_access_token}

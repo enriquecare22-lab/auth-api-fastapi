@@ -33,7 +33,7 @@ def create_token(data: dict):
 
     to_encode.update({"exp": expire, "iat": now, "type": "access"})
 
-    return jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 def create_refresh_token(data: dict):
