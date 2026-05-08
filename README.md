@@ -8,10 +8,12 @@ API de autenticación profesional construida con **FastAPI**, usando **PostgreSQ
 
 * Registro de usuarios
 * Login con autenticación JWT (**Bearer Token**)
+* Refresh token para renovar el access token
 * Hash seguro de contraseñas (**bcrypt**)
 * Rutas protegidas con autenticación
 * Control de acceso por roles (**admin / user**)
 * Obtención del usuario actual desde el token
+* Logout con revocación de **access token** usando blacklist en DB
 * Arquitectura por capas (Clean Architecture)
 * Configuración mediante variables de entorno (`.env`)
 
@@ -25,6 +27,7 @@ API de autenticación profesional construida con **FastAPI**, usando **PostgreSQ
 * PostgreSQL
 * JWT (python-jose)
 * Passlib (bcrypt)
+* email-validator (para `EmailStr` en Pydantic)
 * python-dotenv
 
 ---
@@ -112,7 +115,7 @@ DATABASE_URL=postgresql://user:password@localhost/db_name
 SECRET_KEY=supersecret
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
-ACCESS_TOKen_EXPIRE_DAYS=7
+REFRESH_TOKEN_EXPIRE_DAYS=7
 ```
 
 ---
@@ -128,13 +131,26 @@ Abrir en navegador:
 👉 http://127.0.0.1:8000/docs
 
 ---
-## Logout (Blacklist)
+## 🚪 Logout (Blacklist)
 
 La API implementa una blacklist básica de tokens:
 
 Al hacer logout → el token se guarda en DB
 Tokens en blacklist → no pueden acceder
 
+Endpoint:
+
+```http
+POST /auth/logout
+Authorization: Bearer <access_token>
+```
+
+Notas:
+
+- El logout actual **revoca el access token** (no el refresh token).
+- La validación de blacklist se aplica en rutas protegidas (por ejemplo `GET /users/me`).
+
+---
 
 ## 🔐 Autenticación
 
@@ -177,6 +193,45 @@ Body:
   "email": "user@email.com",
   "password": "123456"
 }
+```
+
+Respuesta (ejemplo):
+
+```json
+{
+  "access_token": "<access_token>",
+  "refresh_token": "<refresh_token>",
+  "token_type": "bearer"
+}
+```
+
+**Refresh token**
+
+```http
+POST /auth/refresh
+```
+
+Body:
+
+```json
+{
+  "refresh_token": "<your_refresh_token>"
+}
+```
+
+Respuesta (actual):
+
+```json
+{
+  "access_token": "<new_access_token>"
+}
+```
+
+**Logout (revocar access token)**
+
+```http
+POST /auth/logout
+Authorization: Bearer <access_token>
 ```
 
 ---
@@ -226,6 +281,14 @@ Puedes probar la API con:
 
 ---
 
+## 🧩 Notas (dependencias)
+
+Si usas `EmailStr` en los schemas, asegúrate de tener instalado `email-validator` (viene en `requirements.txt`). Si tu entorno no lo tiene, verás un error como:
+
+`ImportError: email-validator is not installed`
+
+---
+
 ## 🌿 Flujo de trabajo (Git)
 
 * `main` → producción
@@ -245,8 +308,9 @@ refactor/code-cleanup
 
 ## 🚀 Próximas mejoras
 
-* Expiración de tokens
-* Refresh tokens
+* Rotación de refresh tokens (devolver refresh nuevo en `/auth/refresh`)
+* Revocación de refresh tokens y/o blacklist por `jti` (en vez de guardar el token completo)
+* Endpoint `POST /auth/logout-all` (revocar todos los tokens del usuario)
 * Permisos granulares
 * Docker
 * Deploy (Render / Railway)

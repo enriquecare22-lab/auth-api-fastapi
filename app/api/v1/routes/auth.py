@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.core.security import create_token, decode_token
 from app.db.session import SessionLocal
+from app.models.token_blacklist import TokenBlacklist
 from app.schemas.user import TokenRefresh, UserCreate, UserLogin
 from app.services.auth_service import login, register
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
+security = HTTPBearer()
 
 
 def get_db():
@@ -50,3 +53,20 @@ def refresch_token(data: TokenRefresh):
         })
     
     return {"access_token": new_access_token}
+
+
+@router.post("/logout")
+def logout(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db),
+):
+    token = credentials.credentials
+
+    # Si ya está en blacklist, lo tratamos como logout idempotente
+    exists = db.query(TokenBlacklist).filter(TokenBlacklist.token == token).first()
+    if exists:
+        return {"message": "Logged out"}
+
+    db.add(TokenBlacklist(token=token))
+    db.commit()
+    return {"message": "Logged out"}
