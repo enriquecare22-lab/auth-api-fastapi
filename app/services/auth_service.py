@@ -2,8 +2,8 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.security import (
+    create_access_token,
     create_refresh_token,
-    create_token,
     hash_password,
     verify_password,
 )
@@ -48,7 +48,7 @@ def login(db: Session, user: UserLogin) -> Token:
     # - access_token: Para peticiones normales
     # - refresh_token: Para renovar el acceso sin pedir contrasña
     return Token(
-        access_token=create_token(data),  # FIX nombre correcto
+        access_token=create_access_token(data),  # FIX nombre correcto
         refresh_token=create_refresh_token(data),
         token_type="bearer",
     )

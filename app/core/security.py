@@ -9,7 +9,7 @@ from app.core.config import settings
 pwd_context = CryptContext(schemes=["bcrypt"])
 
 
-def hash_password(password: str):
+def hash_password(password: str) -> str:
     # Genera un hash seguro de la contraseña
     return pwd_context.hash(password)
 
@@ -19,12 +19,7 @@ def verify_password(password, hashed):
     return pwd_context.verify(password, hashed)
 
 
-def create_token(data: dict):
-    """
-    FIX:
-    - Ahora usa to_encode (antes bug)
-    - Incluye type, exp, iat correctamente
-    """
+def create_access_token(data: dict):
     to_encode = data.copy()
 
     # Tiempo actual
