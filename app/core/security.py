@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -14,16 +14,19 @@ def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def verify_password(password, hashed):
+def verify_password(password: str, hashed: str) -> bool:
     # Verificamos si la contraseña ingresada coincide con el hash guardado
     return pwd_context.verify(password, hashed)
 
 
 def create_access_token(data: dict):
+    if "sub" not in data:
+        raise ValueError("Token missing subject")
+
     to_encode = data.copy()
 
     # Tiempo actual
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode.update({"exp": expire, "iat": now, "type": "access"})
@@ -37,7 +40,9 @@ def create_refresh_token(data: dict):
     """
     to_encode = data.copy()
 
-    expire = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(timezone.utc) + timedelta(
+        days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+    )
 
     to_encode.update({"exp": expire, "type": "refresh"})
 
