@@ -3,7 +3,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_db
-from app.core.security import create_token, decode_token
+from app.core.security import create_access_token, decode_token
 from app.models.token_blacklist import TokenBlacklist
 from app.schemas.common import MessageResponse
 from app.schemas.user import (
@@ -44,7 +44,7 @@ def refresh_token(data: TokenRefresh):
 
     email = payload.get("sub")
 
-    new_access_token = create_token({"sub": email, "type": "access"})
+    new_access_token = create_access_token({"sub": email, "type": "access"})
 
     return {"access_token": new_access_token}
 
