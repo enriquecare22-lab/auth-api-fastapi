@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 # Clase base: contiene los atributos comunes para evitar repetir código
@@ -13,16 +13,16 @@ class UserCreate(UserBase):
 
 # Esquema para el inicio de sesión
 class UserLogin(UserBase):
-    password: str
+    password: str = Field(min_length=6, max_length=100)
 
 
 # Esquema para enviar datos al cliente (lo que el usuairo ve)
 class UserResponse(UserBase):
     id: int  # Incluimos el id generado por la base da datos
-
+    email: str
+    role: str
     # Configuracion para la compatibilidad con ORMs (SQLAlchemy)
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Token(BaseModel):
