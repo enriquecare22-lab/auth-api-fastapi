@@ -14,7 +14,7 @@ def get_me(current_user: User = Depends(get_current_user)):
     Endpoint protegido
     Solo usuario con token valido pueden acceder
     """
-    return {"id": current_user.id, "email": current_user.email}
+    return current_user
 
 
 @router.get("/admin", response_model=MessageResponse)
