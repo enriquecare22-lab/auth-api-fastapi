@@ -8,34 +8,49 @@ from app.core.security import (
     verify_password,
 )
 from app.repositories.user_repository import create_user, get_user_by_email
-from app.schemas.user import Token, UserLogin
+from app.schemas.user import Token, UserCreate, UserLogin
 
 
-def register(db: Session, user):
+def generate_auth_tokens(data: dict) -> Token:
     """
-    Logica para registrar un nuevo usuario en el sistema
+    Centraliza generacion de tokens JWT.
     """
+    return Token(
+        access_token=create_access_token(data),
+        refresh_token=create_refresh_token(data),
+        token_type="bearer",
+    )
+
+
+def register(db: Session, user: UserCreate):
+    """
+    Logica para registrar un nuevo usuario
+    """
+
+    email = user.email.lower().strip()
 
     # Validadr si el correo ya esta registrado
-    if get_user_by_email(db, user.email):
+    if get_user_by_email(db, email):
         raise HTTPException(status_code=409, detail="User already exists")
 
-    # Encriptar password - no guardar en texto plano
-    hashed = hash_password(user.password)
+    # Hash password
+    hashed_password = hash_password(user.password)
 
     # Persistencia: Guardar usuario con la contraseña hasheada
-    return create_user(db, user.email, hashed)
+    return create_user(db, email, hashed_password)
 
 
 def login(db: Session, user: UserLogin) -> Token:
     """
     Login de usuario: autenticar usuario y generar sus token de acceso
     """
-    # Buscamos el usuario por email
-    db_user = get_user_by_email(db, user.email)
+
+    email = user.email.lower().strip()
+
+    db_user = get_user_by_email(db, email)
 
     # FIX: validar credenciales, correcta
-    if not db_user or not verify_password(user.password, db_user.password):
+    if not db_user or not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     if not db_user.is_active:
@@ -47,8 +62,4 @@ def login(db: Session, user: UserLogin) -> Token:
     # Generacion del Tokens:
     # - access_token: Para peticiones normales
     # - refresh_token: Para renovar el acceso sin pedir contrasña
-    return Token(
-        access_token=create_access_token(data),  # FIX nombre correcto
-        refresh_token=create_refresh_token(data),
-        token_type="bearer",
-    )
+    return generate_auth_tokens(data)
