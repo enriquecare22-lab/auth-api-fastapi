@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.dependencies import get_db
 from app.core.security import create_access_token, decode_token
 from app.models.token_blacklist import TokenBlacklist
+from app.repositories.user_repository import get_user_by_email
 from app.schemas.common import MessageResponse
 from app.schemas.user import (
     AccessTokenResponse,
@@ -31,7 +32,11 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
 
 
 @router.post("/refresh", response_model=AccessTokenResponse)
-async def refresh_token(data: TokenRefresh):
+async def refresh_token(
+    data: TokenRefresh,
+    db: Session = Depends(get_db),
+):
+
     payload = decode_token(
         data.refresh_token,
         expected_type="refresh",
@@ -45,13 +50,18 @@ async def refresh_token(data: TokenRefresh):
 
     email = payload.get("sub")
 
+    user = get_user_by_email(db, email)
+
     new_access_token = create_access_token(
         {
-            "sub": email,
+            "sub": user.email,
+            "role": user.role,
         }
     )
 
-    return {"access_token": new_access_token}
+    return {
+        "access_token": new_access_token,
+    }
 
 
 @router.post("/logout", response_model=MessageResponse)
