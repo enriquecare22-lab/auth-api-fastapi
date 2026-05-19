@@ -13,7 +13,7 @@ def get_user_by_email(db: Session, email: str) -> Optional[User]:
     return db.query(User).filter(User.email == email).first()
 
 
-def create_user(db: Session, email: str, password: str):
+def create_user(db: Session, email: str, password: str,) -> User:
     """
     Crea un nuevo registro de usuario en la base de datos.
     """
