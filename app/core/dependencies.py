@@ -6,7 +6,7 @@ from app.core.security import decode_token
 from app.db.session import SessionLocal
 from app.models.token_blacklist import TokenBlacklist
 from app.models.user import User
-from app.repositories.user_repository import get_user_by_email
+from app.repositories.user_repository import get_user_by_email, get_user_by_id
 
 security = HTTPBearer()
 
@@ -64,14 +64,14 @@ def get_current_user(
             detail="Invalid token",
         )
 
-    email = payload.get("sub")
-    if not email:
+    user_id = payload.get("sub")
+    if not user_id:
         raise HTTPException(
             status_code=401,
             detail="Invalid token payload",
         )
 
-    user = get_user_by_email(db, email)
+    user = get_user_by_id(db, user_id)
 
     if not user:
         raise HTTPException(

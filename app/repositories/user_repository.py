@@ -1,9 +1,20 @@
 from typing import Optional
+from uuid import UUID
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.models.user import User
+
+
+def get_user_by_id(
+    db: Session,
+    user_id: UUID,
+) -> Optional[User]:
+    """
+    Busca un usuario por ID
+    """
+    return db.query(User).filter(User.id == user_id).first()
 
 
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
@@ -13,7 +24,11 @@ def get_user_by_email(db: Session, email: str) -> Optional[User]:
     return db.query(User).filter(User.email == email).first()
 
 
-def create_user(db: Session, email: str, password: str,) -> User:
+def create_user(
+    db: Session,
+    email: str,
+    password: str,
+) -> User:
     """
     Crea un nuevo registro de usuario en la base de datos.
     """

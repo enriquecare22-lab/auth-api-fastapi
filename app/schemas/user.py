@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -28,7 +29,7 @@ class UserLogin(UserBase):
 
 # Esquema para enviar datos al cliente (lo que el usuairo ve)
 class UserResponse(UserBase):
-    id: int  # Incluimos el id generado por la base da datos
+    id: UUID
     email: str
     role: str
     # Configuracion para la compatibilidad con ORMs (SQLAlchemy)
