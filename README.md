@@ -1,25 +1,47 @@
-# 🚀 Auth API - FastAPI
+# Auth API - FastAPI
 
-API de autenticación profesional construida con **FastAPI**, usando **PostgreSQL**, **JWT**, arquitectura por capas y control de acceso por roles (**RBAC**).
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
+![JWT](https://img.shields.io/badge/Auth-JWT-orange)
+
+API de autenticación construida con **FastAPI**, usando **PostgreSQL**, **JWT** y SQLAlchemy.
+
+El proyecto implementa autenticación basada en tokens JWT con Access Token, Refresh Token, rutas protegidas, control de acceso por roles (RBAC) y blacklist de tokens para logout.
 
 ---
 
-## 📌 Características
+## Características
 
 * Registro de usuarios
-* Login con autenticación JWT (**Bearer Token**)
-* Refresh token para renovar el access token
+* Login con JWT Bearer Token
+* Access Token + Refresh Token
+* Refresh endpoint (`/auth/refresh`)
+* Logout con revocación de tokens
 * Hash seguro de contraseñas (**bcrypt**)
 * Rutas protegidas con autenticación
 * Control de acceso por roles (**admin / user**)
 * Obtención del usuario actual desde el token
 * Logout con revocación de **access token** usando blacklist en DB
-* Arquitectura por capas (Clean Architecture)
+* Arquitectura modular por capas
 * Configuración mediante variables de entorno (`.env`)
 
 ---
 
-## 🛠️ Tecnologías
+## Arquitectura
+
+El proyecto está organizado usando separación de responsabilidades:
+
+* Routes → Endpoints HTTP
+* Services → Lógica de negocio
+* Repositories → Acceso a datos
+* Schemas → Validación y serialización
+* Models → Modelos ORM SQLAlchemy
+* Core → Seguridad, configuración y dependencias
+
+---
+
+##  Tecnologías
 
 * Python 3.10+
 * FastAPI
@@ -32,9 +54,9 @@ API de autenticación profesional construida con **FastAPI**, usando **PostgreSQ
 
 ---
 
-## 📁 Estructura del proyecto
+## Estructura del proyecto
 
-```
+```text
 app/
 │
 ├── api/
@@ -52,7 +74,7 @@ app/
 │   └── session.py
 │
 ├── models/
-│   └── user.py
+│   ├── user.py
 │   └── token_blacklist.py
 │
 ├── schemas/
@@ -69,7 +91,7 @@ app/
 
 ---
 
-## ⚙️ Configuración del entorno
+## Configuración del entorno
 
 ### 1. Clonar repositorio
 
@@ -120,7 +142,19 @@ REFRESH_TOKEN_EXPIRE_DAYS=7
 
 ---
 
-## ▶️ Ejecutar servidor
+## Archivo `.env.example`
+
+```env
+DATABASE_URL=
+SECRET_KEY=
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+REFRESH_TOKEN_EXPIRE_DAYS=7
+```
+
+---
+
+## ▶ Ejecutar servidor
 
 ```bash
 uvicorn app.main:app --reload
@@ -128,39 +162,13 @@ uvicorn app.main:app --reload
 
 Abrir en navegador:
 
-👉 http://127.0.0.1:8000/docs
-
----
-## 🚪 Logout (Blacklist)
-
-La API implementa una blacklist básica de tokens:
-
-Al hacer logout → el token se guarda en DB
-Tokens en blacklist → no pueden acceder
-
-Endpoint:
-
-```http
-POST /auth/logout
-Authorization: Bearer <access_token>
-```
-
-Notas:
-
-- El logout actual **revoca el access token** (no el refresh token).
-- La validación de blacklist se aplica en rutas protegidas (por ejemplo `GET /users/me`).
+ [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ---
 
-## 🔐 Autenticación
+## Autenticación
 
 La API utiliza **JWT con esquema Bearer Token**.
-
-### Flujo:
-
-1. Login → obtiene token
-2. Enviar token en headers
-3. Acceder a rutas protegidas
 
 ### Header requerido
 
@@ -170,32 +178,73 @@ Authorization: Bearer <your_token>
 
 ---
 
-## 🌐 Endpoints
+##  Flujo JWT
 
-### 🔑 Auth
+```text
+Login
+   ↓
+Access Token + Refresh Token
+   ↓
+Access Token → rutas protegidas
+   ↓
+Token expira
+   ↓
+Refresh Token → /auth/refresh
+   ↓
+Nuevo Access Token
+```
 
-**Registro**
+---
+
+## Logout (Blacklist)
+
+La API implementa una blacklist básica de tokens:
+
+* Al hacer logout → el token se guarda en DB
+* Tokens en blacklist → no pueden acceder
+
+### Endpoint
+
+```http
+POST /auth/logout
+Authorization: Bearer <access_token>
+```
+
+### Notas
+
+* El logout actual **revoca únicamente el access token**.
+* La validación de blacklist se aplica en rutas protegidas (por ejemplo `GET /users/me`).
+
+---
+
+##  Endpoints
+
+###  Auth
+
+#### Registro
 
 ```http
 POST /auth/register
 ```
 
-**Login**
+---
+
+#### Login
 
 ```http
 POST /auth/login
 ```
 
-Body:
+### Body
 
 ```json
 {
   "email": "user@email.com",
-  "password": "123456"
+  "password": "12345678"
 }
 ```
 
-Respuesta (ejemplo):
+### Respuesta
 
 ```json
 {
@@ -205,13 +254,15 @@ Respuesta (ejemplo):
 }
 ```
 
-**Refresh token**
+---
+
+#### Refresh Token
 
 ```http
 POST /auth/refresh
 ```
 
-Body:
+### Body
 
 ```json
 {
@@ -219,7 +270,7 @@ Body:
 }
 ```
 
-Respuesta (actual):
+### Respuesta
 
 ```json
 {
@@ -227,7 +278,9 @@ Respuesta (actual):
 }
 ```
 
-**Logout (revocar access token)**
+---
+
+#### Logout
 
 ```http
 POST /auth/logout
@@ -236,43 +289,80 @@ Authorization: Bearer <access_token>
 
 ---
 
-### 👤 Usuarios
+### Usuarios
 
-**Obtener usuario actual**
+#### Obtener usuario actual
 
 ```http
 GET /users/me
 ```
 
-👉 Requiere autenticación
+  Requiere autenticación.
+
+### Respuesta
+
+```json
+{
+  "id": 1,
+  "email": "user@email.com",
+  "role": "user"
+}
+```
 
 ---
 
-### 👑 Admin
+###   Admin
 
-**Endpoint solo admin**
+#### Endpoint solo admin
 
 ```http
 GET /users/admin
 ```
 
-👉 Requiere rol `"admin"`
+  Requiere rol `admin`
 
 ---
 
-## 🛡️ Seguridad
+## 📡 Ejemplo Login con curl
+
+```bash
+curl -X POST "http://127.0.0.1:8000/auth/login" \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "admin@email.com",
+  "password": "12345678"
+}'
+```
+
+---
+
+##   Status Codes
+
+| Code | Description      |
+| ---- | ---------------- |
+| 200  | Success          |
+| 201  | Resource created |
+| 401  | Unauthorized     |
+| 403  | Forbidden        |
+| 409  | Conflict         |
+
+---
+
+##   Seguridad
 
 * Contraseñas encriptadas con bcrypt
+* Access Token y Refresh Token JWT
 * Tokens JWT firmados
 * Expiración configurable
-* Middleware de autenticación
+* Validación de tipo de token
+* Blacklist de tokens revocados
 * Control de acceso por roles (RBAC)
-* Blacklist de tokens
 * Variables sensibles protegidas en `.env`
+* UTC timezone-aware datetimes
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 Puedes probar la API con:
 
@@ -281,40 +371,48 @@ Puedes probar la API con:
 
 ---
 
-## 🧩 Notas (dependencias)
+##  Notas (dependencias)
 
-Si usas `EmailStr` en los schemas, asegúrate de tener instalado `email-validator` (viene en `requirements.txt`). Si tu entorno no lo tiene, verás un error como:
+Si usas `EmailStr` en los schemas, asegúrate de tener instalado `email-validator`.
 
-`ImportError: email-validator is not installed`
+Si tu entorno no lo tiene, verás un error como:
 
----
-
-## 🌿 Flujo de trabajo (Git)
-
-* `main` → producción
-* `feature/*` → nuevas funcionalidades
-* `refactor/*` → mejoras
-
-Ejemplo:
-
-```bash
-feature/auth
-feature/env-config
-feature/roles-rbac
-refactor/code-cleanup
+```text
+ImportError: email-validator is not installed
 ```
 
 ---
 
-## 🚀 Próximas mejoras
+##  Flujo de trabajo (Git)
 
-* Rotación de refresh tokens (devolver refresh nuevo en `/auth/refresh`)
-* Revocación de refresh tokens y/o blacklist por `jti` (en vez de guardar el token completo)
-* Endpoint `POST /auth/logout-all` (revocar todos los tokens del usuario)
-* Permisos granulares
-* Docker
-* Deploy (Render / Railway)
-* Migraciones con Alembic
+* `main` → producción
+* `develop` → desarrollo
+* `feature/*` → nuevas funcionalidades
+* `fix/*` → corrección de errores
+* `refactor/*` → refactorización
+* `docs/*` → documentación
+
+### Ejemplos
+
+```bash
+feature/jwt-auth
+feature/token-blacklist
+fix/token-validation
+refactor/auth-service-layer
+docs/readme-update
+```
 
 ---
+
+##  Conventional Commits
+
+```bash
+feat: implement JWT authentication flow
+fix: validate refresh token correctly
+refactor: separate auth logic into service layer
+docs: improve README documentation
+```
+
+---
+
 
