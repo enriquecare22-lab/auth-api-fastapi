@@ -57,7 +57,10 @@ def login(db: Session, user: UserLogin) -> Token:
         raise HTTPException(status_code=401, detail="Inactive user")
 
     # Preparacion del Payload: Informacion que viajara dentro del JWT
-    data = {"sub": db_user.email, "role": db_user.role}
+    data = {
+        "sub": str(db_user.id),
+        "role": db_user.role,
+    }
 
     # Generacion del Tokens:
     # - access_token: Para peticiones normales
