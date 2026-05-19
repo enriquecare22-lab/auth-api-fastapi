@@ -24,12 +24,15 @@ def get_db():
 
 def require_role(role: str):
     """
-    Middleware para validar role
+    Crear dependencia para validar roles.
     """
 
     def role_checker(user: User = Depends(get_current_user)):
         if user.role != role:
-            raise HTTPException(status_code=403, detail="Forbidden")
+            raise HTTPException(
+                status_code=403,
+                detail="Forbidden",
+            )
         return user
 
     return role_checker
@@ -47,21 +50,39 @@ def get_current_user(
 
     # Validar blacklist
     if db.query(TokenBlacklist).filter(TokenBlacklist.token == token).first():
-        raise HTTPException(status_code=401, detail="Token revoked")
+        raise HTTPException(
+            status_code=401,
+            detail="Token revoked",
+        )
 
     # FIX: validar tipo acces
     payload = decode_token(token, expected_type="access")
 
     if not payload:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token",
+        )
 
     email = payload.get("sub")
     if not email:
-        raise HTTPException(status_code=401, detail="Invalid token payload")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token payload",
+        )
 
     user = get_user_by_email(db, email)
 
     if not user:
-        raise HTTPException(status_code=401, detail="User not found")
+        raise HTTPException(
+            status_code=401,
+            detail="User not found",
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=401,
+            detail="Inactive user",
+        )
 
     return user

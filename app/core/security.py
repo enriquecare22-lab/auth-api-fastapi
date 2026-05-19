@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from typing import Any
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -34,27 +35,28 @@ def create_access_token(data: dict):
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-def create_refresh_token(data: dict):
+def create_refresh_token(data: dict[str, Any]) -> str:
     """
     Gener refresh token
     """
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+
     to_encode = data.copy()
-
-    expire = datetime.now(timezone.utc) + timedelta(
-        days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+    to_encode.update(
+        {
+            "exp": expire,
+            "iat": now,
+            "type": "refresh",
+        }
     )
-
-    to_encode.update({"exp": expire, "type": "refresh"})
 
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 def decode_token(token: str, expected_type: str = "access"):
     """
-    Decodifica un JWT y
-    FIX:
-    - algoritmo ahora es lista
-    - valida tipo corectamente (access o refresh)
+    Decodifica un JWT
     """
     try:
         # Intenta descifrar el token usando la llave secreta y el algoritmo (ej. HS256)
