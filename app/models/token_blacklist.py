@@ -11,6 +11,6 @@ class TokenBlacklist(Base):
     id = Column(Integer, primary_key=True)
     token = Column(String, unique=True)
     created_at = Column(
-        DateTime,
+        DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
     )
