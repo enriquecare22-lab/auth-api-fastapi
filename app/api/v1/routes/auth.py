@@ -31,20 +31,25 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
 
 
 @router.post("/refresh", response_model=AccessTokenResponse)
-def refresh_token(data: TokenRefresh):
-    """
-    FIX:
-    - usa schema
-    - valida tipo refresh
-    """
-    payload = decode_token(data.refresh_token, expected_type="refresh")
+async def refresh_token(data: TokenRefresh):
+    payload = decode_token(
+        data.refresh_token,
+        expected_type="refresh",
+    )
 
     if not payload:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid refresh token",
+        )
 
     email = payload.get("sub")
 
-    new_access_token = create_access_token({"sub": email, "type": "access"})
+    new_access_token = create_access_token(
+        {
+            "sub": email,
+        }
+    )
 
     return {"access_token": new_access_token}
 

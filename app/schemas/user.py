@@ -1,4 +1,14 @@
+from typing import Annotated
+
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+PasswordStr = Annotated[
+    str,
+    Field(
+        min_length=8,
+        max_length=100,
+    ),
+]
 
 
 # Clase base: contiene los atributos comunes para evitar repetir código
@@ -8,12 +18,12 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     # Obliga a que la contraseña tenga una longitud segura antes de procesarla
-    password: str = Field(min_length=6, max_length=100)
+    password: PasswordStr
 
 
 # Esquema para el inicio de sesión
 class UserLogin(UserBase):
-    password: str = Field(min_length=6, max_length=100)
+    password: PasswordStr
 
 
 # Esquema para enviar datos al cliente (lo que el usuairo ve)
