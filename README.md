@@ -25,6 +25,7 @@ El proyecto implementa autenticación basada en tokens JWT con Access Token, Ref
 * Logout con revocación de **access token** usando blacklist en DB
 * Arquitectura modular por capas
 * Configuración mediante variables de entorno (`.env`)
+* Identificación de usuarios mediante UUID
 
 ---
 
@@ -40,6 +41,18 @@ El proyecto está organizado usando separación de responsabilidades:
 * Core → Seguridad, configuración y dependencias
 
 ---
+## Modelo de Usuario
+
+Los usuarios son identificados mediante UUID como clave primaria.
+
+Ejemplo:
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "email": "user@email.com",
+  "role": "user"
+}
 
 ##  Tecnologías
 
@@ -303,7 +316,7 @@ GET /users/me
 
 ```json
 {
-  "id": 1,
+  "id": "550e8400-e29b-41d4-a716-446655440000",
   "email": "user@email.com",
   "role": "user"
 }
@@ -359,6 +372,7 @@ curl -X POST "http://127.0.0.1:8000/auth/login" \
 * Control de acceso por roles (RBAC)
 * Variables sensibles protegidas en `.env`
 * UTC timezone-aware datetimes
+* UUID como identificador
 
 ---
 
@@ -386,7 +400,6 @@ ImportError: email-validator is not installed
 ##  Flujo de trabajo (Git)
 
 * `main` → producción
-* `develop` → desarrollo
 * `feature/*` → nuevas funcionalidades
 * `fix/*` → corrección de errores
 * `refactor/*` → refactorización
